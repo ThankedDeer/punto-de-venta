@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos</title>
+</head>
+<style>
+    #tablaventa{
+        width: max-content;
+        
+    }
+    
+</style>
+<body onload="mostrarPedidos()">
+    
+    <div class="container">
+        <div class="row">
+            <div id="lalo" class="col-12">
+                <table id="tablaventa" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Id Venta</th>
+                            <th>Nombre cliente</th>
+                            <th>N productos</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+
+                    </tbody>
+                  </table>
+            </div>
+            <div class="col-8">
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+</body>
+<script>
+    function mostrarPedidos() {
+        axios.get('http://localhost:3000/mostrarpedidos')
+          .then((response)=>{
+            const data = response.data;
+            console.log(data);
+            const tabla = document.getElementById('tabla');
+            tabla.innerHTML="";
+            data.forEach(venta => {
+               
+                size = tabla.length;
+                row = tabla.insertRow(size);
+
+                cell1 = row.insertCell(0);
+                cell2 = row.insertCell(1);
+                cell3 = row.insertCell(2);
+                
+                
+                cell1.innerHTML = venta.idVenta;
+                cell2.innerHTML = venta.Nombre_cliente;
+                cell3.innerHTML = venta.Cantidad;
+
+                
+            });
+            
+          })
+          .catch((error)=>{
+            console.log(error);
+          });
+
+        
+    }
+</script>
+
+
+
+
+</html>

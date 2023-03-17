@@ -1,0 +1,375 @@
+<body  >
+    <div id="pedidoArriba" class="container">
+      <h1>Bolillos el NENE</h1>
+      <div class="row">
+        <div class="col-2">
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon3 ">Id</span>
+            <input  type="number" readonly  class="form-control " id="id_Pedido" aria-describedby="basic-addon3" />
+          </div>
+        </div>
+          <div class="col-4">
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon3">Nombre Del Cliente</span>
+            <input type="text" class="form-control" id="nomClientes"  aria-describedby="basic-addon3" />
+          </div>
+        </div>
+        <div class="col-2">
+          <button type="button" onclick=" cancelar()" class="btn btn-primary">Nuevo Pedido</button>
+        </div>
+        <div class="col-2">
+          <button type="button" onclick="pedido()"  class="btn btn-success">Crear Pedido</button>
+        </div>
+        <div class="col-2">
+          <button type="button" onclick=" cancelar()" class="btn btn-danger">Cancelar Pedido</button>
+        </div>
+    </div>
+  
+    <div class="row">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Cantidad</th>
+            <th scope="col">Acción</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody id="items"></tbody>
+        <tfoot>
+          <tr id="footer">
+            <th scope="row" colspan="5">Pedido vacío - Agrege Productos!</th>
+          </tr>
+        </tfoot>
+      </table>
+      
+    </div>
+    
+    <div class="row" id="cards">
+      <!-- aqui se insertan los productos -->
+    </div>
+  
+    <template id="template-card">
+      
+        <div id="productos" class="col-3">
+          <div class="card">
+            <div class="card-body">
+              <h5  class="card-title titulo"> <small></small></h5>
+              <h6><small></small></h6>
+              <button type="button" class="btn btn-dark">Agregar</button>
+            </div>
+          </div>
+        </div>
+      
+    </template>
+  
+  
+  
+    
+    <template id="template-footer">
+      <th scope="row" colspan="2">Total productos</th>
+      <td>10</td>
+      <td>
+          <button onclick="LimpiarCarrito() " class="btn btn-danger btn-sm" id="vaciar-carrito">
+              vaciar todo
+          </button>
+      </td>
+      <td class="font-weight-bold">$ <span>5000</span></td>
+  </template>
+  
+  <template id="template-carrito">
+    <tr>
+      <th scope="row">id</th>
+      <td class="tdTitulo">Café</td>
+      <td class="tdCantidad">1</td>
+      <td>
+          <button class="btn btn-info btn-sm aumentar">
+              +
+          </button>
+          <button class="btn btn-danger btn-sm">
+              -
+          </button>
+      </td>
+      <td>$ <span>500</span></td>
+    </tr>
+  </template>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+      crossorigin="anonymous"></script>
+  </body>
+  <script>
+  
+  function idventa() {
+    axios.get('http://localhost:3000/nventas')
+      .then(function(response){
+        data = response.data[0];
+        document.getElementById('id_Pedido').value = data.numeroVentas+1;
+  
+          
+      })
+      .catch(function(error){
+          console.log(error);
+      });
+    
+  }  
+  
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchData();
+      idventa();
+      
+      if (localStorage.getItem('carrito')) {
+            carrito = JSON.parse(localStorage.getItem('carrito'));
+          pintarCarrito();
+      }
+    });
+    const cards = document.getElementById("cards");
+    const items = document.getElementById('items');
+    const footer = document.getElementById('footer');
+    const templateCard = document.getElementById("template-card").content;
+    const templateFooter = document.getElementById('template-footer').content;
+    const templateCarrito = document.getElementById('template-carrito').content;
+    const fragment = document.createDocumentFragment();
+    let carrito = {}
+    items.addEventListener('click', e => { btnAccion(e) })
+  
+  
+    cards.addEventListener('click', e =>{
+      addItem(e)
+    })
+  
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/consultaProducto");
+        const data = await res.json();
+        pintarCard(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+    const pintarCard = (data) => {
+      // console.log(data);
+      data.forEach((producto) => {
+        templateCard.querySelector(".titulo").textContent = producto.Nombre;
+        templateCard.querySelector("h6").textContent = producto.Precio;
+        templateCard.querySelector(".btn-dark").dataset.idProducto = producto.idProducto;
+        templateCard.querySelector(".btn-dark").dataset.idCategoria = producto.idCategoria;
+        
+  
+        const clone = templateCard.cloneNode(true);
+        fragment.appendChild(clone);
+      });
+      cards.appendChild(fragment);
+    };
+  
+    const addItem = e => {
+      // console.log(e.target)
+      // console.log(e.target.classList.contains('btn-dark'))
+      if (e.target.classList.contains('btn-dark')) {
+        //   e.target.parentElement
+        // console.log( e.target.parentElement);
+        setItem(e.target.parentElement);
+      }
+      e.stopPropagation();
+  
+    }
+    const setItem = objeto => {
+      //  console.log(objeto)
+      
+      const producto = {
+  
+          idProducto: objeto.querySelector('.btn-dark').dataset.idProducto,
+          idCategoria:objeto.querySelector('.btn-dark').dataset.idCategoria,
+          Nombre: objeto.querySelector('.titulo').textContent,
+          Precio: objeto.querySelector('h6').textContent,
+          Cantidad: 1
+      }
+        if (carrito.hasOwnProperty(producto.idProducto)) {
+            producto.Cantidad = carrito[producto.idProducto].Cantidad + 1
+          
+        }
+        carrito[producto.idProducto] = {...producto}
+      //  console.log(carrito);
+      pintarCarrito()
+    }
+    
+    
+    const pintarCarrito = () => {
+      items.innerHTML = ''
+  
+      Object.values(carrito).forEach(producto => {
+          templateCarrito.querySelector('th').textContent = producto.idProducto
+          templateCarrito.querySelectorAll('td')[0].textContent = producto.Nombre
+          templateCarrito.querySelectorAll('td')[1].textContent = producto.Cantidad
+          templateCarrito.querySelector('span').textContent = producto.Precio * producto.Cantidad
+          
+          //botones
+          templateCarrito.querySelector('.btn-info').dataset.idProducto = producto.idProducto
+          templateCarrito.querySelector('.btn-danger').dataset.idProducto = producto.idProducto
+  
+          const clone = templateCarrito.cloneNode(true)
+          fragment.appendChild(clone)
+      })
+      items.appendChild(fragment)
+  
+      pintarFooter()
+  
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+  }
+  const pintarFooter = () => {
+      footer.innerHTML = ''
+      
+      if (Object.keys(carrito).length === 0) {
+          footer.innerHTML = `
+          <th scope="row" colspan="5">Pedido vacío</th>
+          `
+          return
+      }
+      
+      // sumar cantidad y sumar totales
+      const nCantidad = Object.values(carrito).reduce((acc, { Cantidad }) => acc + Cantidad, 0)
+      const nPrecio = Object.values(carrito).reduce((acc, {Cantidad, Precio}) => acc + Cantidad * Precio ,0)
+      // console.log(nPrecio)
+  
+      templateFooter.querySelectorAll('td')[0].textContent = nCantidad
+      templateFooter.querySelector('span').textContent = nPrecio
+  
+      const clone = templateFooter.cloneNode(true)
+      fragment.appendChild(clone)
+  
+      footer.appendChild(fragment)}
+  
+      
+      function LimpiarCarrito() {
+        carrito = {};
+        pintarCarrito();
+        
+      }
+  
+  
+      const btnAccion = e => {
+       //console.log(e.target.classList.contains('btn-info'))
+        if (e.target.classList.contains('btn-info')) {
+            //console.log(carrito[e.target.dataset.idProducto]);
+            const producto = carrito[e.target.dataset.idProducto]
+            producto.Cantidad++
+            carrito[e.target.dataset.idProducto] = {...producto}
+            pintarCarrito();
+            
+          
+        }
+        if (e.target.classList.contains('btn-danger')) {
+            //console.log(carrito[e.target.dataset.idProducto]);
+            const producto = carrito[e.target.dataset.idProducto]
+            producto.Cantidad--
+           if (producto.Cantidad === 0 ) {
+              delete carrito[e.target.dataset.idProducto]
+           }
+           pintarCarrito();
+            
+          
+        }
+        e.stopPropagation();    
+  }
+  
+  function crearidPedido() {
+    const idVenta = document.getElementById('id_Pedido').value
+    const nombre = document.getElementById("nomClientes").value;
+     
+    var c={};
+      c.idVenta =  idVenta,
+      c.nomCliente = nombre;
+  
+    var local =localStorage.getItem('carrito')
+     if (nombre != '') {
+          if (local != '{}') {
+            console.log(local);
+            axios.put('http://localhost:3000/insertVenta',c)
+            .then((response)=>{
+              alert("pedido agregado")
+            })
+            .catch((error)=>{
+              
+            }) 
+          }if(local == '{}'){
+            alert("seleccione un producto")
+            return
+          }
+          return
+     }if(nombre == '' && local == '{}'){
+        alert("Ingrese un nombre de Cliente y Seleccione Productos")
+        return
+     }else{
+      alert("Ingrese un nombre de Cliente")
+      return
+     }
+  
+  
+  
+  
+      }
+    
+  
+  function crearPedido() {
+    const idVenta = document.getElementById('id_Pedido').value
+    var local =localStorage.getItem('carrito')
+    
+    if (local!= '{}') {
+        Object.values(JSON.parse(localStorage.getItem('carrito'))).forEach(producto => {
+        var c={};
+        c.idVenta =  idVenta,
+        c.idProducto = producto.idProducto,
+        c.Cantidad =  producto.Cantidad;
+        
+        
+        axios.put('http://localhost:3000/insertVentaProducto',c)
+        .then((response)=>{
+          
+         
+          
+        })
+        .catch((error)=>{
+          console.log("Error");
+        })
+         
+      }
+        )
+       
+   
+    }else{
+     
+      console.log('rfrfrf');
+    }
+   }
+      
+    
+    
+  function pedido() {
+    crearidPedido();
+    crearPedido();
+    idventa();
+    
+  }
+
+
+  
+  function cancelar() {
+    LimpiarCarrito()
+    document.getElementById("nomClientes").value = '';
+  
+  
+  
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    </script>

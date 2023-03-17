@@ -1,0 +1,43 @@
+<body  ondragstart="return false" onselectstart="return false" oncontextmenu="return false">
+    <h2>Alta de usuarios.</h2>
+        <form>
+            <label>ID del usuario.</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="idvendedor" placeholder="Ej: 1">
+            </div>
+            
+            <label>Nombre del usuario.</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="usuario" placeholder="Ej: Maximiliano">
+            </div>
+            <label>Contraseña.</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="contraseña" placeholder="Ej: cascarr16">
+            </div>
+        </form>
+        <button type="submit" class="btn btn-info" onclick="Guardarr()">Guardar</button>
+    
+        <div class="col-1">
+            <button id="btna2" ><a id="btna" href="http://localhost:3000/menu">Cancelar</a></button>
+        </div>
+  <script>
+    function Guardarr(){
+          seleccionado = {}
+          seleccionado.idVendedor=document.getElementById('idvendedor').value;
+          seleccionado.Usuario=document.getElementById('usuario').value;
+          seleccionado.Contraseña=document.getElementById('contraseña').value;
+          /* console.log(vendedorr +" "+ usuarioo +" "+ contraseñaa); */
+          axios.post('http://localhost:3000/api/usuario', seleccionado)
+          .then((response)=>{
+            const data = response.data;
+            console.log(data);
+            /* vendedorr.value=response.data[0].idVendedor;
+            usuarioo.value=response.data[0].Usuario;
+            contraseñaa.value=response.data[0].Contraseña;  */
+          })
+          .catch((error)=>{
+            console.log(error);
+          });
+        }
+</script>
+  </body>

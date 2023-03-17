@@ -1,0 +1,54 @@
+<body onload="selCategoria()">
+    <h2>Alta de productos.</h2>
+        <select id="selectCategoria" class="form-select" aria-label="Default select example">
+            <option selected>Selecciona una categoría</option>
+        </select>
+        <form>
+            <label>Nombre del producto.</label>
+            <div class="mb-3">
+                <input type="text" id="nombre"  class="form-control"  placeholder="Ej: Tacos de pastor">
+            </div>
+            <label>Precio del producto.</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="precio" placeholder="Ej: 39">
+            </div>
+        </form>
+        <button type="submit" class="btn btn-info" onclick="Guardar()">Guardar</button>
+        <div class="col-1">
+            <button id="btna2" ><a id="btna" href="http://localhost:3000/menu">Cancelar</a></button>
+        </div>
+        <script>
+            function selCategoria() {
+                document.getElementById('selectCategoria').innerHTML="";
+                axios.get('http://localhost:3000/categoria')
+                .then((response)=>{
+                    response.data.forEach((element) => {
+                    opt=document.createElement('option');
+                    opt.value=element.idCategoria;
+                    opt.innerHTML=element.Nombre;
+                    document.getElementById('selectCategoria').appendChild(opt);
+                    });
+                })
+                .catch((error)=>{
+                    console.log(error);
+                 });
+            }
+
+            function Guardar(){
+                seleccionado = {}
+                seleccionado.idCategoria=selectCategoria.selectedOptions[0].value;
+                seleccionado.Nombre=document.getElementById('nombre').value;
+                seleccionado.Precio=document.getElementById('precio').value;
+                // console.log(nombree +" "+ precioo +" "+ seleccionado); 
+                axios.post('http://localhost:3000/api/productos' , seleccionado)
+                .then((response)=>{
+                    const data = response.data;
+                    console.log(data)
+                })
+                .catch((error)=>{
+                    console.log(error);
+                });
+            } 
+            
+        </script>
+</body>
